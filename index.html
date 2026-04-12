@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Financeiro — Augustto Leao</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Manrope',sans-serif;background:#090A10;color:#E8E8E8;min-height:100vh;padding:24px}
+  .header{text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .header h1{font-size:28px;font-weight:800;background:linear-gradient(135deg,#C9A84C,#F0D78C,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px}
+  .header p{color:#888;font-size:13px;margin-top:6px}
+  .tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+  .tab{padding:10px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#888;cursor:pointer;font-family:'Manrope';font-size:13px;font-weight:600;transition:all 0.2s}
+  .tab:hover{border-color:rgba(201,168,76,0.3);color:#CCC}
+  .tab.active{background:rgba(201,168,76,0.12);border-color:#C9A84C;color:#C9A84C}
+  .panel{display:none}
+  .panel.active{display:block}
+  .summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+  .summary-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;text-align:center}
+  .summary-card.receita{border-color:rgba(72,187,120,0.3)}
+  .summary-card.despesa{border-color:rgba(245,101,101,0.3)}
+  .summary-card.saldo-pos{border-color:rgba(72,187,120,0.5)}
+  .summary-card.saldo-neg{border-color:rgba(245,101,101,0.5)}
+  .summary-card.divida{border-color:rgba(237,137,54,0.3)}
+  .summary-card .label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin-bottom:8px}
+  .summary-card .value{font-size:24px;font-weight:800}
+  .summary-card.receita .value{color:#48BB78}
+  .summary-card.despesa .value{color:#F56565}
+  .summary-card.saldo-pos .value{color:#48BB78}
+  .summary-card.saldo-neg .value{color:#F56565}
+  .summary-card.divida .value{color:#ED8936}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:32px}
+  .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px}
+  .card h2{font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#C9A84C;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid rgba(201,168,76,0.2)}
+  .card h2.green{color:#48BB78;border-color:rgba(72,187,120,0.2)}
+  .card h2.red{color:#F56565;border-color:rgba(245,101,101,0.2)}
+  .card h2.orange{color:#ED8936;border-color:rgba(237,137,54,0.2)}
+  .card h2.blue{color:#63B3ED;border-color:rgba(99,179,237,0.2)}
+  .card h2.purple{color:#9F7AEA;border-color:rgba(159,122,234,0.2)}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+  .row:last-child{border-bottom:none}
+  .row .name{font-size:13px;color:#CCC;flex:1}
+  .row input{width:120px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:6px 10px;color:#FFF;font-family:'Manrope';font-size:13px;font-weight:600;text-align:right}
+  .row input:focus{outline:none;border-color:#C9A84C;box-shadow:0 0 0 2px rgba(201,168,76,0.15)}
+  .row-total{display:flex;justify-content:space-between;align-items:center;padding:12px 0;margin-top:8px;border-top:2px solid rgba(255,255,255,0.1);font-weight:700;font-size:15px}
+  .chart-container{position:relative;height:280px;display:flex;align-items:center;justify-content:center}
+  .chart-full{position:relative;height:350px;margin-top:16px}
+  .month-table{width:100%;border-collapse:collapse;margin-top:16px}
+  .month-table th{text-align:left;padding:10px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;border-bottom:2px solid rgba(255,255,255,0.1)}
+  .month-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.04)}
+  .month-table input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:6px 8px;color:#FFF;font-family:'Manrope';font-size:12px;font-weight:600;text-align:right}
+  .month-table input:focus{outline:none;border-color:#C9A84C}
+  .month-table .mes-label{color:#C9A84C;font-weight:700;font-size:13px;min-width:70px}
+  .month-table .saldo-cell{font-weight:700;font-size:13px;text-align:right;padding-right:12px}
+  .btn{padding:10px 20px;border-radius:8px;border:1px solid rgba(201,168,76,0.4);background:rgba(201,168,76,0.1);color:#C9A84C;cursor:pointer;font-family:'Manrope';font-size:13px;font-weight:700;transition:all 0.2s;margin:4px}
+  .btn:hover{background:rgba(201,168,76,0.2)}
+  .btn.danger{border-color:rgba(245,101,101,0.4);background:rgba(245,101,101,0.1);color:#F56565}
+  .btn.danger:hover{background:rgba(245,101,101,0.2)}
+  .actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .saved-msg{color:#48BB78;font-size:12px;margin-left:12px;opacity:0;transition:opacity 0.3s}
+  .saved-msg.show{opacity:1}
+  .footer{text-align:center;padding-top:24px;margin-top:32px;border-top:1px solid rgba(255,255,255,0.06);color:#555;font-size:11px}
+  @media(max-width:900px){.summary-bar{grid-template-columns:repeat(2,1fr)}.grid,.grid-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>DASHBOARD FINANCEIRO</h1>
+  <p>Augustto Leao / Sellect Intelligence</p>
+  <p style="color:#C9A84C;margin-top:4px;font-size:11px;">Todos os campos sao editaveis • Dados salvos automaticamente no navegador</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('visao')">Visao Geral</div>
+  <div class="tab" onclick="switchTab('mensal')">Controle Mensal</div>
+  <div class="tab" onclick="switchTab('dividas')">Dividas</div>
+</div>
+
+<!-- ========== PAINEL: VISAO GERAL ========== -->
+<div id="panel-visao" class="panel active">
+
+<div class="summary-bar">
+  <div class="summary-card receita"><div class="label">Receita Mensal</div><div class="value" id="sumReceita">R$ 0</div></div>
+  <div class="summary-card despesa"><div class="label">Despesa Mensal</div><div class="value" id="sumDespesa">R$ 0</div></div>
+  <div class="summary-card" id="saldoCard"><div class="label">Saldo Mensal</div><div class="value" id="sumSaldo">R$ 0</div></div>
+  <div class="summary-card divida"><div class="label">Dividas Totais</div><div class="value" id="sumDivida">R$ 0</div></div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2 class="green">Fontes de Receita (mensal)</h2>
+    <div class="row"><span class="name">Mentoria AURA</span><input type="number" class="receita-input" data-key="aura" value="0"></div>
+    <div class="row"><span class="name">Ative seu Poder (infoproduto)</span><input type="number" class="receita-input" data-key="ative" value="0"></div>
+    <div class="row"><span class="name">Sellect e Parcerias</span><input type="number" class="receita-input" data-key="sellect" value="0"></div>
+    <div class="row"><span class="name">Peptidios</span><input type="number" class="receita-input" data-key="peptidios" value="0"></div>
+    <div class="row"><span class="name">Residual ID</span><input type="number" class="receita-input" data-key="residual" value="1000"></div>
+    <div class="row-total"><span>TOTAL RECEITA</span><span id="totalReceita" style="color:#48BB78">R$ 0</span></div>
+  </div>
+  <div class="card">
+    <h2 class="green">Distribuicao da Receita</h2>
+    <div class="chart-container"><canvas id="chartReceita"></canvas></div>
+  </div>
+</div>
+
+<div class="grid-3">
+  <div class="card">
+    <h2 class="red">Custo Fixo Familiar</h2>
+    <div class="row"><span class="name">Aluguel + Gas + Condominio</span><input type="number" class="fixofam-input" data-key="aluguel" value="10000"></div>
+    <div class="row"><span class="name">Escola (4 filhos)</span><input type="number" class="fixofam-input" data-key="escola" value="5000"></div>
+    <div class="row-total"><span>SUBTOTAL</span><span id="totalFixoFam" style="color:#F56565">R$ 0</span></div>
+  </div>
+  <div class="card">
+    <h2 class="orange">Custo Variavel Familiar</h2>
+    <div class="row"><span class="name">Energia</span><input type="number" class="varfam-input" data-key="energia" value="350"></div>
+    <div class="row"><span class="name">Internet</span><input type="number" class="varfam-input" data-key="internet" value="140"></div>
+    <div class="row"><span class="name">Farmacia / Leite / Cosmeticos</span><input type="number" class="varfam-input" data-key="farmacia" value="500"></div>
+    <div class="row"><span class="name">Gasolina Familiar</span><input type="number" class="varfam-input" data-key="gasFam" value="400"></div>
+    <div class="row"><span class="name">Academia Wave</span><input type="number" class="varfam-input" data-key="academia" value="249"></div>
+    <div class="row"><span class="name">Meli+ (streaming)</span><input type="number" class="varfam-input" data-key="meli" value="74.90"></div>
+    <div class="row"><span class="name">Spotify</span><input type="number" class="varfam-input" data-key="spotify" value="35"></div>
+    <div class="row"><span class="name">Amazon Prime</span><input type="number" class="varfam-input" data-key="prime" value="22.90"></div>
+    <div class="row"><span class="name">IPVA Rampage (prov.)</span><input type="number" class="varfam-input" data-key="ipva" value="362"></div>
+    <div class="row-total"><span>SUBTOTAL</span><span id="totalVarFam" style="color:#ED8936">R$ 0</span></div>
+  </div>
+  <div class="card">
+    <h2 class="purple">Custo Empresa (Sellect)</h2>
+    <div class="row"><span class="name">Gasolina Profissional</span><input type="number" class="empresa-input" data-key="gasPro" value="800"></div>
+    <div class="row"><span class="name">Contador (2 CNPJs)</span><input type="number" class="empresa-input" data-key="contador" value="700"></div>
+    <div class="row"><span class="name">Refis Tributario</span><input type="number" class="empresa-input" data-key="refis" value="700"></div>
+    <div class="row"><span class="name">Claude.ai</span><input type="number" class="empresa-input" data-key="claude" value="513"></div>
+    <div class="row"><span class="name">Claro</span><input type="number" class="empresa-input" data-key="claro" value="284"></div>
+    <div class="row"><span class="name">iCloud 6TB</span><input type="number" class="empresa-input" data-key="icloud" value="200"></div>
+    <div class="row"><span class="name">N8N Cloud</span><input type="number" class="empresa-input" data-key="n8n" value="155"></div>
+    <div class="row"><span class="name">Captions</span><input type="number" class="empresa-input" data-key="captions" value="150"></div>
+    <div class="row"><span class="name">Tactiq.io</span><input type="number" class="empresa-input" data-key="tactiq" value="110"></div>
+    <div class="row"><span class="name">Figma</span><input type="number" class="empresa-input" data-key="figma" value="109"></div>
+    <div class="row"><span class="name">Linktree</span><input type="number" class="empresa-input" data-key="linktree" value="65"></div>
+    <div class="row"><span class="name">Google One (Augustto)</span><input type="number" class="empresa-input" data-key="googleA" value="49"></div>
+    <div class="row"><span class="name">Google One (Sellect)</span><input type="number" class="empresa-input" data-key="googleS" value="49"></div>
+    <div class="row"><span class="name">MindMeister</span><input type="number" class="empresa-input" data-key="mind" value="40"></div>
+    <div class="row"><span class="name">Uazapi</span><input type="number" class="empresa-input" data-key="uazapi" value="29"></div>
+    <div class="row-total"><span>SUBTOTAL</span><span id="totalEmpresa" style="color:#9F7AEA">R$ 0</span></div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2 class="orange">Para onde vai seu dinheiro</h2>
+    <div class="chart-container"><canvas id="chartDespesas"></canvas></div>
+  </div>
+  <div class="card">
+    <h2>Receita vs Despesa</h2>
+    <div class="chart-container"><canvas id="chartBalance"></canvas></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2 class="blue">Composicao Detalhada</h2>
+  <div class="chart-full"><canvas id="chartDetalhado"></canvas></div>
+</div>
+
+</div>
+
+<!-- ========== PAINEL: CONTROLE MENSAL ========== -->
+<div id="panel-mensal" class="panel">
+
+<div class="card" style="margin-bottom:24px">
+  <h2 class="green">Receita Realizada — Mes a Mes</h2>
+  <div style="overflow-x:auto">
+  <table class="month-table">
+    <thead>
+      <tr>
+        <th>Mes</th>
+        <th>Mentoria AURA</th>
+        <th>Ative seu Poder</th>
+        <th>Sellect/Parcerias</th>
+        <th>Peptidios</th>
+        <th>Residual ID</th>
+        <th>Total Receita</th>
+      </tr>
+    </thead>
+    <tbody id="tblReceitaMensal"></tbody>
+  </table>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:24px">
+  <h2 class="red">Despesa Realizada — Mes a Mes</h2>
+  <div style="overflow-x:auto">
+  <table class="month-table">
+    <thead>
+      <tr>
+        <th>Mes</th>
+        <th>Fixo Familiar</th>
+        <th>Var. Familiar</th>
+        <th>Empresa</th>
+        <th>Juros Dividas</th>
+        <th>Extras</th>
+        <th>Total Despesa</th>
+        <th>Saldo</th>
+      </tr>
+    </thead>
+    <tbody id="tblDespesaMensal"></tbody>
+  </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2 class="blue">Evolucao Mensal — Receita vs Despesa vs Saldo</h2>
+  <div class="chart-full"><canvas id="chartMensal"></canvas></div>
+</div>
+
+</div>
+
+<!-- ========== PAINEL: DIVIDAS ========== -->
+<div id="panel-dividas" class="panel">
+
+<div class="card" style="margin-bottom:24px">
+  <h2 class="orange">Dividas Ativas</h2>
+  <div class="row"><span class="name">Agiota Murilo (saldo)</span><input type="number" class="divida-input" data-key="agiota" value="30000"></div>
+  <div class="row"><span class="name">Juros agiota/mes (5%)</span><input type="number" class="divida-input" data-key="jAgiota" value="1500"></div>
+  <div class="row"><span class="name">Nubank (emprestimo)</span><input type="number" class="divida-input" data-key="nubank" value="70000"></div>
+  <div class="row"><span class="name">Isaac Dantas Martins</span><input type="number" class="divida-input" data-key="isaac" value="7000"></div>
+  <div class="row"><span class="name">Santander (cartao)</span><input type="number" class="divida-input" data-key="santander" value="2671"></div>
+  <div class="row"><span class="name">Cartao C6 PF</span><input type="number" class="divida-input" data-key="c6pf" value="1811"></div>
+  <div class="row"><span class="name">Cartao MP</span><input type="number" class="divida-input" data-key="mp" value="1724"></div>
+  <div class="row"><span class="name">Parcelamentos C6</span><input type="number" class="divida-input" data-key="parcC6" value="1900"></div>
+  <div class="row-total"><span>TOTAL DIVIDAS</span><span id="totalDivida" style="color:#ED8936">R$ 0</span></div>
+</div>
+
+<div class="card">
+  <h2 class="orange">Projecao Agiota (5% a.m. s/ R$ 30k)</h2>
+  <div class="chart-full"><canvas id="chartAgiota"></canvas></div>
+</div>
+
+</div>
+
+<!-- ACTIONS -->
+<div class="actions" style="margin-top:24px;margin-bottom:16px">
+  <button class="btn" onclick="saveAll()">Salvar Dados</button>
+  <button class="btn" onclick="exportPDF()">Exportar PDF (Cmd+P)</button>
+  <button class="btn danger" onclick="if(confirm('Limpar todos os dados salvos?')) resetAll()">Resetar Tudo</button>
+  <span class="saved-msg" id="savedMsg">Dados salvos!</span>
+</div>
+
+<div class="footer">
+  <p>Dashboard Financeiro — Augustto Leao / Sellect Intelligence</p>
+  <p>Gerado por Claude Code • Dados salvos localmente no navegador (localStorage)</p>
+</div>
+
+<script>
+const MESES = ['Abr/26','Mai/26','Jun/26','Jul/26','Ago/26','Set/26','Out/26','Nov/26','Dez/26','Jan/27','Fev/27','Mar/27'];
+const STORAGE_KEY = 'augustto_dashboard_v2';
+const fmt = v => 'R$ ' + Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+// Tab switching
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelector(`.tab[onclick*="${id}"]`).classList.add('active');
+  if(id==='mensal') updateMensal();
+  if(id==='dividas') updateDividas();
+}
+
+// Build monthly tables
+function buildMonthlyTables() {
+  const recBody = document.getElementById('tblReceitaMensal');
+  const despBody = document.getElementById('tblDespesaMensal');
+  recBody.innerHTML = '';
+  despBody.innerHTML = '';
+
+  MESES.forEach((mes, i) => {
+    // Receita
+    recBody.innerHTML += `<tr>
+      <td class="mes-label">${mes}</td>
+      <td><input type="number" class="mr-input" data-mes="${i}" data-cat="aura" value="0"></td>
+      <td><input type="number" class="mr-input" data-mes="${i}" data-cat="ative" value="0"></td>
+      <td><input type="number" class="mr-input" data-mes="${i}" data-cat="sellect" value="0"></td>
+      <td><input type="number" class="mr-input" data-mes="${i}" data-cat="peptidios" value="0"></td>
+      <td><input type="number" class="mr-input" data-mes="${i}" data-cat="residual" value="${i===0?1000:0}"></td>
+      <td class="saldo-cell" style="color:#48BB78" id="mrTotal${i}">R$ 0</td>
+    </tr>`;
+    // Despesa
+    despBody.innerHTML += `<tr>
+      <td class="mes-label">${mes}</td>
+      <td><input type="number" class="md-input" data-mes="${i}" data-cat="fixoFam" value="${i===0?15000:0}"></td>
+      <td><input type="number" class="md-input" data-mes="${i}" data-cat="varFam" value="${i===0?2134:0}"></td>
+      <td><input type="number" class="md-input" data-mes="${i}" data-cat="empresa" value="${i===0?3953:0}"></td>
+      <td><input type="number" class="md-input" data-mes="${i}" data-cat="juros" value="${i===0?1500:0}"></td>
+      <td><input type="number" class="md-input" data-mes="${i}" data-cat="extras" value="0"></td>
+      <td class="saldo-cell" style="color:#F56565" id="mdTotal${i}">R$ 0</td>
+      <td class="saldo-cell" id="mSaldo${i}">R$ 0</td>
+    </tr>`;
+  });
+
+  document.querySelectorAll('.mr-input,.md-input').forEach(el => el.addEventListener('input', updateMensal));
+}
+
+function getValues(cls) {
+  const inputs = document.querySelectorAll('.'+cls);
+  let total = 0; const items = {};
+  inputs.forEach(i => { const v = parseFloat(i.value)||0; items[i.dataset.key]=v; total+=v; });
+  return {items,total};
+}
+
+let charts = {};
+
+function destroyChart(name) { if(charts[name]) { charts[name].destroy(); delete charts[name]; } }
+
+function updateMain() {
+  const rec=getValues('receita-input'), fixo=getValues('fixofam-input'), vari=getValues('varfam-input'), emp=getValues('empresa-input'), div=getValues('divida-input');
+  const juros=parseFloat(document.querySelector('[data-key="jAgiota"]')?.value)||0;
+  const totalDesp=fixo.total+vari.total+emp.total+juros;
+  const saldo=rec.total-totalDesp;
+
+  document.getElementById('totalReceita').textContent=fmt(rec.total);
+  document.getElementById('totalFixoFam').textContent=fmt(fixo.total);
+  document.getElementById('totalVarFam').textContent=fmt(vari.total);
+  document.getElementById('totalEmpresa').textContent=fmt(emp.total);
+  document.getElementById('totalDivida').textContent=fmt(div.total);
+  document.getElementById('sumReceita').textContent=fmt(rec.total);
+  document.getElementById('sumDespesa').textContent=fmt(totalDesp);
+  document.getElementById('sumSaldo').textContent=fmt(saldo);
+  document.getElementById('sumDivida').textContent=fmt(div.total);
+  const sc=document.getElementById('saldoCard');
+  sc.className='summary-card '+(saldo>=0?'saldo-pos':'saldo-neg');
+
+  // Receita pizza
+  const rL=['Mentoria AURA','Ative seu Poder','Sellect/Parcerias','Peptidios','Residual ID'];
+  const rD=[rec.items.aura,rec.items.ative,rec.items.sellect,rec.items.peptidios,rec.items.residual];
+  const rC=['#C9A84C','#F0D78C','#48BB78','#63B3ED','#888'];
+  destroyChart('receita');
+  charts.receita=new Chart(document.getElementById('chartReceita'),{type:'doughnut',data:{labels:rL.filter((_,i)=>rD[i]>0),datasets:[{data:rD.filter(v=>v>0),backgroundColor:rC.filter((_,i)=>rD[i]>0),borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#AAA',font:{size:11,family:'Manrope'},padding:12}},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)}}}}});
+
+  // Despesas pizza
+  const dL=['Fixo Familiar','Variavel Familiar','Empresa','Juros Dividas'];
+  const dD=[fixo.total,vari.total,emp.total,juros];
+  const dC=['#F56565','#ED8936','#9F7AEA','#FC8181'];
+  destroyChart('despesas');
+  charts.despesas=new Chart(document.getElementById('chartDespesas'),{type:'doughnut',data:{labels:dL.filter((_,i)=>dD[i]>0),datasets:[{data:dD.filter(v=>v>0),backgroundColor:dC.filter((_,i)=>dD[i]>0),borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#AAA',font:{size:11,family:'Manrope'},padding:12}},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)+' ('+(c.raw/totalDesp*100).toFixed(1)+'%)'}}}}});
+
+  // Balance bar
+  destroyChart('balance');
+  charts.balance=new Chart(document.getElementById('chartBalance'),{type:'bar',data:{labels:['Receita','Fixo Fam.','Var. Fam.','Empresa','Juros','SALDO'],datasets:[{data:[rec.total,-fixo.total,-vari.total,-emp.total,-juros,saldo],backgroundColor:['#48BB78','#F56565','#ED8936','#9F7AEA','#FC8181',saldo>=0?'#48BB78':'#F56565'],borderRadius:6,barThickness:32}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}},scales:{y:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#CCC',font:{size:10}},grid:{display:false}}}}});
+
+  // Detalhado horizontal
+  const aL=[],aD=[],aC=[];
+  const nFixo={aluguel:'Aluguel+Cond',escola:'Escola'};
+  const nVar={energia:'Energia',internet:'Internet',farmacia:'Farmacia',gasFam:'Gas.Familiar',academia:'Academia',meli:'Meli+',spotify:'Spotify',prime:'Prime',ipva:'IPVA'};
+  const nEmp={gasPro:'Gas.Prof.',contador:'Contador',refis:'Refis',claude:'Claude',claro:'Claro',icloud:'iCloud',n8n:'N8N',captions:'Captions',tactiq:'Tactiq',figma:'Figma',linktree:'Linktree',googleA:'Google(A)',googleS:'Google(S)',mind:'MindMeister',uazapi:'Uazapi'};
+  Object.entries(fixo.items).forEach(([k,v])=>{if(v>0){aL.push(nFixo[k]||k);aD.push(v);aC.push('#F56565')}});
+  Object.entries(vari.items).forEach(([k,v])=>{if(v>0){aL.push(nVar[k]||k);aD.push(v);aC.push('#ED8936')}});
+  Object.entries(emp.items).forEach(([k,v])=>{if(v>0){aL.push(nEmp[k]||k);aD.push(v);aC.push('#9F7AEA')}});
+  if(juros>0){aL.push('Juros Agiota');aD.push(juros);aC.push('#FC8181')}
+  destroyChart('detalhado');
+  charts.detalhado=new Chart(document.getElementById('chartDetalhado'),{type:'bar',data:{labels:aL,datasets:[{data:aD,backgroundColor:aC,borderRadius:4,barThickness:18}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}},scales:{x:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#CCC',font:{size:11}},grid:{display:false}}}}});
+
+  autoSave();
+}
+
+function updateMensal() {
+  const recMes=[], despMes=[], saldoMes=[];
+  MESES.forEach((_, i) => {
+    let rTot=0, dTot=0;
+    document.querySelectorAll(`.mr-input[data-mes="${i}"]`).forEach(el => rTot+=parseFloat(el.value)||0);
+    document.querySelectorAll(`.md-input[data-mes="${i}"]`).forEach(el => dTot+=parseFloat(el.value)||0);
+    const s = rTot - dTot;
+    document.getElementById('mrTotal'+i).textContent=fmt(rTot);
+    document.getElementById('mdTotal'+i).textContent=fmt(dTot);
+    const sCell=document.getElementById('mSaldo'+i);
+    sCell.textContent=fmt(s);
+    sCell.style.color=s>=0?'#48BB78':'#F56565';
+    recMes.push(rTot); despMes.push(dTot); saldoMes.push(s);
+  });
+
+  // Acumulado
+  let acum = 0;
+  const acumArr = saldoMes.map(s => { acum += s; return acum; });
+
+  destroyChart('mensal');
+  charts.mensal=new Chart(document.getElementById('chartMensal'),{type:'bar',data:{labels:MESES,datasets:[
+    {type:'bar',label:'Receita',data:recMes,backgroundColor:'rgba(72,187,120,0.6)',borderRadius:4,barThickness:20,order:2},
+    {type:'bar',label:'Despesa',data:despMes.map(v=>-v),backgroundColor:'rgba(245,101,101,0.6)',borderRadius:4,barThickness:20,order:2},
+    {type:'line',label:'Saldo Acumulado',data:acumArr,borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,0.1)',fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:'#C9A84C',order:1}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#AAA',font:{size:11,family:'Manrope'}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},scales:{y:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#CCC'},grid:{display:false}}}}});
+  autoSave();
+}
+
+function updateDividas() {
+  const div=getValues('divida-input');
+  document.getElementById('totalDivida').textContent=fmt(div.total);
+  document.getElementById('sumDivida').textContent=fmt(div.total);
+
+  const saldo0=div.items.agiota||30000;
+  const taxa=0.05;
+  const meses=12;
+  const proj=[saldo0];
+  for(let i=1;i<=meses;i++) proj.push(Math.round(proj[i-1]*(1+taxa)));
+
+  destroyChart('agiota');
+  charts.agiota=new Chart(document.getElementById('chartAgiota'),{type:'line',data:{labels:['Hoje',...MESES],datasets:[{label:'Saldo Agiota (se nao pagar)',data:proj,borderColor:'#F56565',backgroundColor:'rgba(245,101,101,0.1)',fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:'#F56565'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#AAA'}},tooltip:{callbacks:{label:c=>fmt(c.raw)}}},scales:{y:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#CCC'},grid:{display:false}}}}});
+  autoSave();
+}
+
+// SAVE / LOAD
+function collectAll() {
+  const data = {};
+  document.querySelectorAll('input[type="number"]').forEach(el => {
+    const id = el.className.split(' ')[0] + '_' + (el.dataset.key || el.dataset.mes+'_'+el.dataset.cat);
+    data[id] = el.value;
+  });
+  return data;
+}
+
+function restoreAll(data) {
+  if(!data) return;
+  document.querySelectorAll('input[type="number"]').forEach(el => {
+    const id = el.className.split(' ')[0] + '_' + (el.dataset.key || el.dataset.mes+'_'+el.dataset.cat);
+    if(data[id] !== undefined) el.value = data[id];
+  });
+}
+
+function autoSave() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collectAll())); } catch(e) {}
+}
+
+function saveAll() {
+  autoSave();
+  const msg = document.getElementById('savedMsg');
+  msg.classList.add('show');
+  setTimeout(() => msg.classList.remove('show'), 2000);
+}
+
+function resetAll() {
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+function exportPDF() {
+  window.print();
+}
+
+// INIT
+buildMonthlyTables();
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if(saved) restoreAll(saved);
+} catch(e) {}
+
+document.querySelectorAll('.receita-input,.fixofam-input,.varfam-input,.empresa-input').forEach(el => el.addEventListener('input', updateMain));
+document.querySelectorAll('.divida-input').forEach(el => el.addEventListener('input', updateDividas));
+
+updateMain();
+updateDividas();
+</script>
+</body>
+</html>
