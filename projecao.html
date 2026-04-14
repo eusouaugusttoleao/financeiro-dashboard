@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projecao Financeira 2026-2027 — Augustto Leao</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',sans-serif;background:#090A10;color:#E8E8E8;padding:24px;min-height:100vh}
+.header{text-align:center;margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.header h1{font-size:28px;font-weight:800;background:linear-gradient(135deg,#C9A84C,#F0D78C,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{color:#888;font-size:13px;margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:32px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:#C9A84C;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid rgba(201,168,76,0.2)}
+.card h2.red{color:#F56565;border-color:rgba(245,101,101,0.2)}
+.card h2.green{color:#48BB78;border-color:rgba(72,187,120,0.2)}
+.card h2.orange{color:#ED8936;border-color:rgba(237,137,54,0.2)}
+.card h2.blue{color:#63B3ED;border-color:rgba(99,179,237,0.2)}
+.card h2.purple{color:#9F7AEA;border-color:rgba(159,122,234,0.2)}
+.kpi{text-align:center;padding:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px}
+.kpi .label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin-bottom:6px}
+.kpi .value{font-size:28px;font-weight:800}
+.kpi.green .value{color:#48BB78}
+.kpi.red .value{color:#F56565}
+.kpi.gold .value{color:#C9A84C}
+.kpi.orange .value{color:#ED8936}
+.kpi.blue .value{color:#63B3ED}
+.kpi .sub{font-size:11px;color:#666;margin-top:4px}
+.chart-h{position:relative;height:320px}
+.chart-h2{position:relative;height:400px}
+.timeline{position:relative;padding-left:24px;border-left:2px solid rgba(201,168,76,0.2)}
+.timeline .ev{padding:12px 0 20px 16px;position:relative}
+.timeline .ev::before{content:'';position:absolute;left:-29px;top:16px;width:10px;height:10px;border-radius:50%;background:#C9A84C;border:2px solid #090A10}
+.timeline .ev.red::before{background:#F56565}
+.timeline .ev.green::before{background:#48BB78}
+.timeline .ev .date{font-size:11px;color:#C9A84C;font-weight:700;letter-spacing:1px}
+.timeline .ev .desc{font-size:13px;color:#CCC;margin-top:4px;line-height:1.5}
+.scenario-tabs{display:flex;gap:8px;margin-bottom:16px}
+.scenario-tab{padding:8px 16px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#888;cursor:pointer;font-family:'Manrope';font-size:12px;font-weight:600;transition:all .2s}
+.scenario-tab:hover{border-color:rgba(201,168,76,0.3);color:#CCC}
+.scenario-tab.active{background:rgba(201,168,76,0.12);border-color:#C9A84C;color:#C9A84C}
+.tbl{width:100%;border-collapse:collapse;margin-top:12px}
+.tbl th{text-align:left;padding:8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;border-bottom:2px solid rgba(255,255,255,0.1)}
+.tbl td{padding:8px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.tbl .pos{color:#48BB78;font-weight:700}
+.tbl .neg{color:#F56565;font-weight:700}
+.section-break{text-align:center;padding:40px 0;color:#333;font-size:11px;text-transform:uppercase;letter-spacing:3px}
+.footer{text-align:center;padding:24px;color:#444;font-size:11px;margin-top:32px;border-top:1px solid rgba(255,255,255,0.06)}
+@media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PROJECAO FINANCEIRA 2026-2027</h1>
+  <p>Franklin Augusto Costa Alves de Sousa (Augustto Leao) | 33 anos | 4 filhos | Atualizado 12/04/2026</p>
+</div>
+
+<!-- KPIs -->
+<div class="grid4">
+  <div class="kpi green"><div class="label">Faturamento 12 meses</div><div class="value">R$ 624k</div><div class="sub">Abr/2025 a Mar/2026</div></div>
+  <div class="kpi red"><div class="label">Total gasto 12 meses</div><div class="value">R$ 624k</div><div class="sub">Sobrou R$ 464 no periodo</div></div>
+  <div class="kpi orange"><div class="label">Dividas Totais</div><div class="value">R$ 115k</div><div class="sub">Agiota + Nubank + Isaac + Santander</div></div>
+  <div class="kpi red"><div class="label">Deficit Mensal Atual</div><div class="value">-R$ 21.738</div><div class="sub">Receita R$ 1k vs Despesa R$ 22.738</div></div>
+</div>
+<div class="grid4">
+  <div class="kpi gold"><div class="label">Unico Ativo</div><div class="value">R$ 107k</div><div class="sub">Rampage Rebel 2025 (quitada)</div></div>
+  <div class="kpi blue"><div class="label">Breakeven</div><div class="value">R$ 22.738</div><div class="sub">9 sessoes R$2.500 ou 1 CMO + AURA</div></div>
+  <div class="kpi orange"><div class="label">Pensao / mes</div><div class="value">R$ 15k</div><div class="sub">66% do custo total mensal</div></div>
+  <div class="kpi gold"><div class="label">Custo juros / mes</div><div class="value">R$ 3.900</div><div class="sub">Agiota + Nubank + Santander acumulando</div></div>
+</div>
+
+<!-- FATURAMENTO ANUAL -->
+<div class="section-break">— faturamento anual por categoria —</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2 class="green">De onde veio o dinheiro — R$ 624.168 (12 meses)</h2>
+    <div class="chart-h"><canvas id="chartRecAnual"></canvas></div>
+  </div>
+  <div class="card">
+    <h2 class="red">Para onde foi o dinheiro — R$ 623.704 (12 meses)</h2>
+    <div class="chart-h"><canvas id="chartDespAnual"></canvas></div>
+  </div>
+</div>
+
+<!-- DETALHAMENTO BARRAS -->
+<div class="card" style="margin-bottom:32px">
+  <h2 class="green">Receita por fonte — detalhado</h2>
+  <div class="chart-h"><canvas id="chartRecBar"></canvas></div>
+</div>
+
+<div class="card" style="margin-bottom:32px">
+  <h2 class="red">Despesa por categoria — detalhado (todos os R$ 623.704)</h2>
+  <div class="chart-h2"><canvas id="chartDespBar2"></canvas></div>
+</div>
+
+<div class="section-break">— situacao atual e projecao —</div>
+
+<!-- COMPOSICAO DESPESAS -->
+<div class="grid2">
+  <div class="card">
+    <h2 class="red">Para onde vai seu dinheiro (R$ 22.738/mes)</h2>
+    <div class="chart-h"><canvas id="chartDespPizza"></canvas></div>
+  </div>
+  <div class="card">
+    <h2 class="red">Detalhamento por item</h2>
+    <div class="chart-h"><canvas id="chartDespBar"></canvas></div>
+  </div>
+</div>
+
+<!-- DIVIDAS -->
+<div class="grid2">
+  <div class="card">
+    <h2 class="orange">Dividas — Composicao</h2>
+    <div class="chart-h"><canvas id="chartDivPizza"></canvas></div>
+  </div>
+  <div class="card">
+    <h2 class="orange">Agiota — Projecao 12 meses (se nao pagar)</h2>
+    <div class="chart-h"><canvas id="chartAgiota"></canvas></div>
+  </div>
+</div>
+
+<!-- CUSTO JUROS -->
+<div class="card" style="margin-bottom:32px">
+  <h2 class="orange">Custo da inacao — quanto cada divida CRESCE por mes</h2>
+  <div class="chart-h"><canvas id="chartCustoJuros"></canvas></div>
+</div>
+
+<div class="section-break">— 3 cenarios de projecao —</div>
+
+<!-- CENARIOS -->
+<div class="card" style="margin-bottom:32px">
+  <div class="scenario-tabs">
+    <div class="scenario-tab active" onclick="showScenario('pessimista')">A — Pessimista</div>
+    <div class="scenario-tab" onclick="showScenario('realista')">B — Realista</div>
+    <div class="scenario-tab" onclick="showScenario('otimista')">C — Otimista</div>
+  </div>
+  <h2 class="blue" id="scenarioTitle">Cenario A — Pessimista (receita max R$ 5k/mes)</h2>
+  <div class="chart-h2"><canvas id="chartCenario"></canvas></div>
+</div>
+
+<!-- COMPARATIVO 3 CENARIOS -->
+<div class="card" style="margin-bottom:32px">
+  <h2 class="green">Comparativo — Saldo acumulado nos 3 cenarios</h2>
+  <div class="chart-h2"><canvas id="chartComparativo"></canvas></div>
+</div>
+
+<!-- BREAKEVEN -->
+<div class="grid3">
+  <div class="kpi gold"><div class="label">Pensao R$ 15k (atual)</div><div class="value">R$ 22.738</div><div class="sub">Receita necessaria/mes</div></div>
+  <div class="kpi gold"><div class="label">Pensao R$ 10k (reduzida)</div><div class="value">R$ 17.738</div><div class="sub">Receita necessaria/mes</div></div>
+  <div class="kpi gold"><div class="label">Pensao R$ 8k (emergencial)</div><div class="value">R$ 15.738</div><div class="sub">Receita necessaria/mes</div></div>
+</div>
+
+<!-- PLANO QUITACAO -->
+<div class="card" style="margin-bottom:32px">
+  <h2 class="green">Plano de quitacao (cenario B)</h2>
+  <div class="chart-h"><canvas id="chartQuitacao"></canvas></div>
+</div>
+
+<!-- HISTORICO -->
+<div class="card" style="margin-bottom:32px">
+  <h2>Historico 12 meses — Receita vs Despesa (extratos reais)</h2>
+  <div class="chart-h2"><canvas id="chartHistorico"></canvas></div>
+</div>
+
+<!-- TOP BENEFICIARIOS -->
+<div class="card" style="margin-bottom:32px">
+  <h2>Top 10 beneficiarios — para onde foi o dinheiro em 12 meses</h2>
+  <div class="chart-h2"><canvas id="chartBenef"></canvas></div>
+</div>
+
+<!-- TIMELINE -->
+<div class="card" style="margin-bottom:32px">
+  <h2>Timeline da crise</h2>
+  <div class="timeline">
+    <div class="ev green"><div class="date">ABR/2025</div><div class="desc">Vida pre-separacao. Luci Luci pagando R$ 43k/mes. Estabilidade.</div></div>
+    <div class="ev red"><div class="date">JUN/2025</div><div class="desc">Separacao da Talitta. Pensao R$ 15k/mes. Aluguel ap. Berlatto R$ 4.178/mes.</div></div>
+    <div class="ev red"><div class="date">SET/2025</div><div class="desc">Compra BMW 320 por R$ 240k. Emprestimo Nubank R$ 70k + Isaac R$ 14k.</div></div>
+    <div class="ev red"><div class="date">OUT/2025</div><div class="desc">Para de pagar Nubank. Pega R$ 60k com agiota Murilo @ 5% a.m.</div></div>
+    <div class="ev"><div class="date">DEZ/2025</div><div class="desc">Vende BMW R$ 140k. Paga R$ 30k agiota. Compra Rampage R$ 107k. Sai do ap. Berlatto. Modo nomade.</div></div>
+    <div class="ev red"><div class="date">FEV/2026</div><div class="desc">Colapso conta MP. Pior mes (-R$ 5.692). Muda pra casa da familia em Brasilia.</div></div>
+    <div class="ev red"><div class="date">MAR/2026</div><div class="desc">Luci Luci encerra contrato dia 20. Receita cai de R$ 43k para R$ 0.</div></div>
+    <div class="ev"><div class="date">ABR/2026</div><div class="desc">PONTO ATUAL. Deficit R$ 21.738/mes. AURA em construcao. LinkedIn ativando. Projecao financeira completa.</div></div>
+  </div>
+</div>
+
+<!-- ASSINATURAS -->
+<div class="grid2">
+  <div class="card">
+    <h2 class="purple">Assinaturas Empresa — R$ 1.866/mes</h2>
+    <div class="chart-h"><canvas id="chartAssEmp"></canvas></div>
+  </div>
+  <div class="card">
+    <h2 class="purple">Assinaturas Pessoal — R$ 477/mes</h2>
+    <div class="chart-h"><canvas id="chartAssPes"></canvas></div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Projecao Financeira — Augustto Leao / Sellect Intelligence</p>
+  <p>Gerado por Claude Code em 12/04/2026 | Dados reais de extratos C6 + Registrato BCB + faturas + declaracoes</p>
+</div>
+
+<script>
+const MESES = ['Abr/26','Mai/26','Jun/26','Jul/26','Ago/26','Set/26','Out/26','Nov/26','Dez/26','Jan/27','Fev/27','Mar/27'];
+const fmt = v => 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+const cOpts = {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#AAA',font:{size:11,family:'Manrope'},padding:10}}}};
+
+// === FATURAMENTO ANUAL ===
+const recAnualColors=['#C9A84C','#F0D78C','#48BB78','#63B3ED','#9F7AEA','#ED8936','#FC8181','#888','#666'];
+new Chart(document.getElementById('chartRecAnual'),{type:'doughnut',data:{
+  labels:['Luci Luci (CMO) 68%','Pix recebidos 17%','Brangian Motors 10%','Joao Pedro 2.4%','PVC Sintetico 1%','Joni Jantsch 0.8%','Outros 0.9%'],
+  datasets:[{data:[424939,104662,63000,15000,6001,5000,5567],backgroundColor:recAnualColors,borderWidth:0,hoverOffset:8}]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.label.split(' ')[0]+': '+fmt(c.raw)}}}}});
+
+const despAnualColors=['#F56565','#FC8181','#ED8936','#63B3ED','#9F7AEA','#C9A84C','#4299E1','#48BB78','#E53E3E','#DD6B20','#D69E2E','#805AD5','#2B6CB0','#38A169','#C05621','#718096','#4A5568','#2D3748','#A0AEC0','#E2E8F0','#CBD5E0','#EDF2F7'];
+new Chart(document.getElementById('chartDespAnual'),{type:'doughnut',data:{
+  labels:['Pensao/Talitta 31%','Pix diversos 15%','Pro-labore PJ→PF 9%','Carro BMW 8%','Aluguel Berlatto 5%','Fatura MP 4%','Alimentacao 3%','Agiota 3%','Despachante+Revenda 5%','Combustivel 2%','Outros 15%'],
+  datasets:[{data:[195052,91241,54973,67281,29250,27786,18040,17300,28804,13547,80430],backgroundColor:despAnualColors,borderWidth:0,hoverOffset:8}]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.label.split('%')[0].trim()+': '+fmt(c.raw)}}}}});
+
+// RECEITA BARRAS
+new Chart(document.getElementById('chartRecBar'),{type:'bar',data:{
+  labels:['Luci Luci (CMO)','Pix recebidos / estornos','Brangian Motors','Joao Pedro Villas Boas','PVC Sintetico','Joni Jantsch','Talitta (devol.)','Outros'],
+  datasets:[{data:[424939,104662,63000,15000,6001,5000,2946,2621],backgroundColor:['#C9A84C','#F0D78C','#48BB78','#63B3ED','#9F7AEA','#ED8936','#FC8181','#888'],borderRadius:4,barThickness:20}]
+},options:{indexAxis:'y',...cOpts,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' ('+((c.raw/624168)*100).toFixed(1)+'%)'}}},scales:{x:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#CCC',font:{size:12}},grid:{display:false}}}}});
+
+// DESPESA BARRAS COMPLETO
+new Chart(document.getElementById('chartDespBar2'),{type:'bar',data:{
+  labels:['Pensao / Talitta','Pix diversos','Pro-labore PJ→PF','Carro BMW (J.Victor)','Aluguel (Berlatto)','Fatura MP','Alimentacao','Agiota (Murilo)','Carro BMW (Andre)','Despachante','Pgto fatura cartao','Combustivel','Revenda veiculos','Emprestimo (Isaac)','Investimentos','Telefonia (Claro)','Tarifas bancarias','Moradia (luz/agua)','Uber','Academia','Outros'],
+  datasets:[{data:[195052,91241,54973,50000,29250,27786,18040,17300,17281,16304,14147,13547,12500,9500,7981,4832,4696,3294,2161,1148,32631],
+    backgroundColor:['#F56565','#FC8181','#ED8936','#63B3ED','#9F7AEA','#C9A84C','#48BB78','#E53E3E','#63B3ED','#4299E1','#805AD5','#DD6B20','#2B6CB0','#C05621','#38A169','#D69E2E','#718096','#4A5568','#A0AEC0','#48BB78','#888'],borderRadius:4,barThickness:16}]
+},options:{indexAxis:'y',...cOpts,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' ('+((c.raw/623704)*100).toFixed(1)+'%)'}}},scales:{x:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#CCC',font:{size:11}},grid:{display:false}}}}});
+
+// DESPESAS PIZZA
+new Chart(document.getElementById('chartDespPizza'),{type:'doughnut',data:{
+  labels:['Familia (pensao)','Empresa (Sellect)','Pessoal','Juros dividas'],
+  datasets:[{data:[15000,4009,2229,1500],backgroundColor:['#F56565','#9F7AEA','#ED8936','#FC8181'],borderWidth:0,hoverOffset:8}]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)+' ('+((c.raw/22738)*100).toFixed(1)+'%)'}}}}});
+
+// DESPESAS BAR
+new Chart(document.getElementById('chartDespBar'),{type:'bar',data:{
+  labels:['Aluguel+Cond','Escola','Gasolina','Contador','Refis','Claude','Claro','iCloud','Captions','Energia','Farmacia','Gas.Fam','Academia','SaaS outros','Juros agiota'],
+  datasets:[{data:[10000,5000,800,700,700,513,284,200,150,350,500,400,249,592,1500],
+    backgroundColor:['#F56565','#F56565','#9F7AEA','#9F7AEA','#9F7AEA','#9F7AEA','#9F7AEA','#9F7AEA','#9F7AEA','#ED8936','#ED8936','#ED8936','#ED8936','#ED8936','#FC8181'],borderRadius:4,barThickness:14}]
+},options:{indexAxis:'y',...cOpts,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}},scales:{x:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#CCC',font:{size:11}},grid:{display:false}}}}});
+
+// DIVIDAS PIZZA
+new Chart(document.getElementById('chartDivPizza'),{type:'doughnut',data:{
+  labels:['Nubank (R$70k)','Agiota Murilo (R$30k)','Isaac (R$7k)','Santander (R$2.671)','C6+MP+Parc (R$5.435)'],
+  datasets:[{data:[70000,30000,7000,2671,5435],backgroundColor:['#F56565','#FC8181','#ED8936','#FBD38D','#888'],borderWidth:0,hoverOffset:8}]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)}}}}});
+
+// AGIOTA PROJECAO
+const agioData=[30000];for(let i=1;i<=12;i++)agioData.push(Math.round(agioData[i-1]*1.05));
+new Chart(document.getElementById('chartAgiota'),{type:'line',data:{
+  labels:['Hoje',...MESES],datasets:[{label:'Saldo agiota',data:agioData,borderColor:'#F56565',backgroundColor:'rgba(245,101,101,0.1)',fill:true,tension:.3,pointRadius:4,pointBackgroundColor:'#F56565'}]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>fmt(c.raw)}}},scales:{y:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#CCC'},grid:{display:false}}}}});
+
+// CUSTO JUROS
+new Chart(document.getElementById('chartCustoJuros'),{type:'bar',data:{
+  labels:['Agiota (12m)','Nubank (12m)','Santander (12m)','Isaac (12m)'],
+  datasets:[
+    {label:'Valor hoje',data:[30000,70000,2671,7000],backgroundColor:'rgba(237,137,54,0.6)',borderRadius:4},
+    {label:'Valor em 12 meses',data:[56895,88000,4500,7000],backgroundColor:'rgba(245,101,101,0.6)',borderRadius:4}
+  ]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},scales:{y:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#CCC'},grid:{display:false}}}}});
+
+// CENARIOS DATA
+const cenarios={
+  pessimista:{title:'Cenario A — Pessimista (receita max R$ 5k/mes)',
+    rec:[1000,3000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000],
+    desp:[22738,22738,22738,15738,15738,15738,15738,15738,15738,15738,15738,15738],
+    nota:'Venda Rampage em Jun/26. Quita agiota+Isaac+Santander. Compra carro popular.'},
+  realista:{title:'Cenario B — Realista (AURA + CMO em 60 dias)',
+    rec:[1000,10000,20000,30000,35000,35000,35000,35000,40000,40000,40000,40000],
+    desp:[22738,22738,22738,22738,22738,22738,22738,22738,22738,22738,22738,22738],
+    nota:'Out/26: quita Santander+Isaac. Dez/26: negocia Nubank. Mar/27: quita agiota.'},
+  otimista:{title:'Cenario C — Otimista (execucao agressiva)',
+    rec:[5000,25000,40000,50000,55000,60000,65000,70000,75000,80000,80000,80000],
+    desp:[22738,22738,22738,25000,25000,28000,28000,30000,30000,35000,35000,35000],
+    nota:'Dividas zeradas ate Ago/26. Reserva R$100k+. AURA escalando.'}
+};
+
+let chartCenario=null;
+function showScenario(key){
+  document.querySelectorAll('.scenario-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.scenario-tab[onclick*="${key}"]`).classList.add('active');
+  document.getElementById('scenarioTitle').textContent=cenarios[key].title;
+  const c=cenarios[key];
+  const saldo=[];let acum=0;
+  c.rec.forEach((r,i)=>{acum+=r-c.desp[i];saldo.push(acum)});
+  if(chartCenario)chartCenario.destroy();
+  chartCenario=new Chart(document.getElementById('chartCenario'),{type:'bar',data:{
+    labels:MESES,datasets:[
+      {type:'bar',label:'Receita',data:c.rec,backgroundColor:'rgba(72,187,120,0.5)',borderRadius:4,order:2},
+      {type:'bar',label:'Despesa',data:c.desp.map(v=>-v),backgroundColor:'rgba(245,101,101,0.5)',borderRadius:4,order:2},
+      {type:'line',label:'Saldo Acumulado',data:saldo,borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,0.08)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:saldo.map(v=>v>=0?'#48BB78':'#F56565'),borderWidth:2,order:1}
+    ]
+  },options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c2=>c2.dataset.label+': '+fmt(c2.raw)}},subtitle:{display:true,text:c.nota,color:'#888',font:{size:11},padding:{bottom:10}}},scales:{y:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#CCC'},grid:{display:false}}}}});
+}
+showScenario('pessimista');
+
+// COMPARATIVO 3 CENARIOS
+function calcAcum(rec,desp){const a=[];let s=0;rec.forEach((r,i)=>{s+=r-desp[i];a.push(s)});return a}
+new Chart(document.getElementById('chartComparativo'),{type:'line',data:{
+  labels:MESES,datasets:[
+    {label:'A - Pessimista',data:calcAcum(cenarios.pessimista.rec,cenarios.pessimista.desp),borderColor:'#F56565',backgroundColor:'rgba(245,101,101,0.05)',fill:false,tension:.3,pointRadius:4,borderDash:[5,5]},
+    {label:'B - Realista',data:calcAcum(cenarios.realista.rec,cenarios.realista.desp),borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,0.08)',fill:true,tension:.3,pointRadius:5,borderWidth:3},
+    {label:'C - Otimista',data:calcAcum(cenarios.otimista.rec,cenarios.otimista.desp),borderColor:'#48BB78',backgroundColor:'rgba(72,187,120,0.05)',fill:false,tension:.3,pointRadius:4,borderDash:[5,5]}
+  ]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}},annotation:{}},scales:{y:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#CCC'},grid:{display:false}}}}});
+
+// QUITACAO
+new Chart(document.getElementById('chartQuitacao'),{type:'bar',data:{
+  labels:['Santander\nOut/26','Isaac\nOut/26','Nubank\nDez/26','Agiota\nMar/27'],
+  datasets:[
+    {label:'Valor original',data:[2671,7000,70000,30000],backgroundColor:'rgba(245,101,101,0.5)',borderRadius:4},
+    {label:'Valor negociado',data:[2671,7000,28000,35000],backgroundColor:'rgba(72,187,120,0.6)',borderRadius:4}
+  ]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},scales:{y:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#CCC',font:{size:11}},grid:{display:false}}}}});
+
+// HISTORICO
+const hRec=[26715,44354,54031,42079,49198,122068,54345,42955,55615,63141,29836,39826];
+const hDesp=[23591,47330,53998,40353,51821,120256,55987,41514,51448,60319,35528,39630];
+const hSaldo=hRec.map((r,i)=>r-hDesp[i]);
+const hMeses=['Abr/25','Mai/25','Jun/25','Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26'];
+new Chart(document.getElementById('chartHistorico'),{type:'bar',data:{
+  labels:hMeses,datasets:[
+    {type:'bar',label:'Entradas',data:hRec,backgroundColor:'rgba(72,187,120,0.5)',borderRadius:4,order:2},
+    {type:'bar',label:'Saidas',data:hDesp.map(v=>-v),backgroundColor:'rgba(245,101,101,0.5)',borderRadius:4,order:2},
+    {type:'line',label:'Liquido',data:hSaldo,borderColor:'#C9A84C',tension:.3,pointRadius:5,pointBackgroundColor:hSaldo.map(v=>v>=0?'#48BB78':'#F56565'),borderWidth:2,order:1}
+  ]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},scales:{y:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},x:{ticks:{color:'#CCC'},grid:{display:false}}}}});
+
+// TOP BENEFICIARIOS
+new Chart(document.getElementById('chartBenef'),{type:'bar',data:{
+  labels:['Talitta (pensao)','Franklin (PJ→PF)','Joao Victor (BMW)','Berlatto (aluguel)','Mercado Pago','Murilo (agiota)','Andre (BMW)','Zequinha (desp.)','Combustivel','Fastpay (carro)'],
+  datasets:[{data:[197051,56536,50000,29250,27786,17300,17281,16303,13638,12500],
+    backgroundColor:['#F56565','#ED8936','#63B3ED','#9F7AEA','#C9A84C','#FC8181','#63B3ED','#63B3ED','#ED8936','#63B3ED'],borderRadius:4,barThickness:18}]
+},options:{indexAxis:'y',...cOpts,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}},scales:{x:{ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#CCC',font:{size:11}},grid:{display:false}}}}});
+
+// ASSINATURAS EMPRESA
+new Chart(document.getElementById('chartAssEmp'),{type:'doughnut',data:{
+  labels:['Claude','Claro','iCloud','N8N','Captions','Tactiq','Figma','Linktree','Meta Verified','Google One x2','MindMeister','Uazapi'],
+  datasets:[{data:[513,284,200,155,150,110,109,65,56,98,40,29],
+    backgroundColor:['#C9A84C','#F0D78C','#9F7AEA','#48BB78','#63B3ED','#ED8936','#F56565','#FC8181','#4299E1','#D69E2E','#68D391','#888'],borderWidth:0,hoverOffset:6}]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)}}}}});
+
+// ASSINATURAS PESSOAL
+new Chart(document.getElementById('chartAssPes'),{type:'doughnut',data:{
+  labels:['Academia Wave','C6 Carbon','Meli+','Spotify','Amazon Prime'],
+  datasets:[{data:[249,98,74.90,35,20],backgroundColor:['#48BB78','#C9A84C','#9F7AEA','#63B3ED','#ED8936'],borderWidth:0,hoverOffset:6}]
+},options:{...cOpts,plugins:{...cOpts.plugins,tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.raw)}}}}});
+</script>
+</body>
+</html>
